@@ -486,8 +486,10 @@ function CofreApp({ onLock, accountName, accountEmail, userId }) {
     showToast("Relatório CSV exportado");
   }
 
+  const showBottomNav = Boolean(challenge && tab !== "setup");
+
   return (
-    <div style={S.app}>
+    <div style={showBottomNav ? { ...S.app, paddingBottom: "calc(86px + env(safe-area-inset-bottom))" } : S.app}>
       <GlobalStyle />
       {toast && <div style={S.toast}>{toast}</div>}
 
@@ -543,28 +545,14 @@ function CofreApp({ onLock, accountName, accountEmail, userId }) {
             projectedDate={projectedDate}
           />
 
-          <nav className="no-print" style={S.tabs}>
+          <div className="no-print" style={S.actionsRow}>
             <button style={S.primaryBtn} onClick={() => setShowTransfer(true)}>
               💸 Transferir
             </button>
-            {[
-              ["cofre", "Cofre"],
-              ["evolucao", "Evolução"],
-              ["conquistas", "Conquistas"],
-              ["relatorio", "Relatório"],
-            ].map(([id, label]) => (
-              <button
-                key={id}
-                onClick={() => setTab(id)}
-                style={{ ...S.tabBtn, ...(tab === id ? S.tabBtnActive : {}) }}
-              >
-                {label}
-              </button>
-            ))}
             <button onClick={() => setConfirmReset(true)} style={S.resetBtn}>
               Reiniciar cofre
             </button>
-          </nav>
+          </div>
 
           {tab === "cofre" && (
             <section key="cofre" className="fade-in">
@@ -621,6 +609,8 @@ function CofreApp({ onLock, accountName, accountEmail, userId }) {
               />
             </div>
           )}
+
+          <BottomNav tab={tab} onChangeTab={setTab} />
         </>
       )}
 
@@ -1716,6 +1706,107 @@ function PasswordInput({ value, onChange, placeholder, onKeyDown, name, autoComp
   );
 }
 
+function NavIcon({ id, active }) {
+  const stroke = active ? COL.gold : COL.textDim;
+  const fill = active ? COL.gold : "none";
+  const common = { width: 22, height: 22, viewBox: "0 0 24 24" };
+  switch (id) {
+    case "setup":
+      return (
+        <svg {...common} fill="none">
+          <path
+            d="M3 11L12 4L21 11V19.4C21 19.96 20.55 20.4 20 20.4H4C3.45 20.4 3 19.96 3 19.4V11Z"
+            stroke={stroke}
+            strokeWidth={2}
+            strokeLinejoin="round"
+            fill={active ? "rgba(108,99,255,0.12)" : "none"}
+          />
+          <path d="M9.5 20.4V13.5H14.5V20.4" stroke={stroke} strokeWidth={2} strokeLinejoin="round" />
+        </svg>
+      );
+    case "cofre":
+      return (
+        <svg {...common} fill="none">
+          <rect x="3.5" y="6" width="17" height="14" rx="2.5" stroke={stroke} strokeWidth={2} />
+          <circle cx="12" cy="13" r="2.6" stroke={stroke} strokeWidth={2} fill={fill} />
+          <path d="M8 6V5C8 3.34 9.34 2 11 2H13C14.66 2 16 3.34 16 5V6" stroke={stroke} strokeWidth={2} />
+        </svg>
+      );
+    case "evolucao":
+      return (
+        <svg {...common} fill="none">
+          <path
+            d="M3.5 19L9 12.5L13 16L20.5 7"
+            stroke={stroke}
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path d="M15 7H20.5V12.5" stroke={stroke} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      );
+    case "conquistas":
+      return (
+        <svg {...common} fill="none">
+          <path
+            d="M7 4H17V10C17 13.3 14.76 16 12 16C9.24 16 7 13.3 7 10V4Z"
+            stroke={stroke}
+            strokeWidth={2}
+            strokeLinejoin="round"
+            fill={fill}
+          />
+          <path d="M7 6H4.5V8.5C4.5 10.2 5.8 11.5 7.5 11.5" stroke={stroke} strokeWidth={2} />
+          <path d="M17 6H19.5V8.5C19.5 10.2 18.2 11.5 16.5 11.5" stroke={stroke} strokeWidth={2} />
+          <path d="M12 16V19M9 21H15" stroke={stroke} strokeWidth={2} strokeLinecap="round" />
+        </svg>
+      );
+    case "relatorio":
+      return (
+        <svg {...common} fill="none">
+          <path
+            d="M6 3H15L19 7V19.4C19 19.96 18.55 20.4 18 20.4H6C5.45 20.4 5 19.96 5 19.4V4C5 3.45 5.45 3 6 3Z"
+            stroke={stroke}
+            strokeWidth={2}
+            strokeLinejoin="round"
+            fill={active ? "rgba(108,99,255,0.12)" : "none"}
+          />
+          <path d="M8.5 11H15.5M8.5 14.5H15.5M8.5 18H13" stroke={stroke} strokeWidth={2} strokeLinecap="round" />
+        </svg>
+      );
+    default:
+      return null;
+  }
+}
+
+function BottomNav({ tab, onChangeTab }) {
+  const items = [
+    ["setup", "Início"],
+    ["cofre", "Cofre"],
+    ["evolucao", "Evolução"],
+    ["conquistas", "Conquistas"],
+    ["relatorio", "Relatório"],
+  ];
+  return (
+    <nav className="no-print" style={S.bottomNav}>
+      {items.map(([id, label]) => {
+        const active = tab === id;
+        return (
+          <button
+            key={id}
+            onClick={() => onChangeTab(id)}
+            style={{ ...S.bottomNavBtn, ...(active ? S.bottomNavBtnActive : {}) }}
+          >
+            <span className={active ? "nav-icon-active" : undefined} key={`${id}-${active}`}>
+              <NavIcon id={id} active={active} />
+            </span>
+            <span>{label}</span>
+          </button>
+        );
+      })}
+    </nav>
+  );
+}
+
 function AvatarLabelGroup({ name, email, onLogout }) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef(null);
@@ -1874,6 +1965,13 @@ function GlobalStyle() {
         0% { left: -40%; }
         100% { left: 100%; }
       }
+
+      @keyframes navPop {
+        0% { transform: scale(0.75); }
+        60% { transform: scale(1.18); }
+        100% { transform: scale(1); }
+      }
+      .nav-icon-active { animation: navPop 0.28s ease; display: inline-flex; }
 
       @media print {
         .no-print { display: none !important; }
@@ -2378,28 +2476,13 @@ const S = {
   },
   statValue: { fontSize: 16, fontWeight: 700, color: COL.text },
 
-  tabs: {
+  actionsRow: {
     maxWidth: 980,
     margin: "0 auto 16px",
     display: "flex",
     gap: 8,
     flexWrap: "wrap",
     alignItems: "center",
-  },
-  tabBtn: {
-    background: "transparent",
-    border: `1px solid ${COL.border}`,
-    color: COL.textDim,
-    padding: "9px 16px",
-    borderRadius: 999,
-    fontSize: 13,
-    fontWeight: 600,
-    cursor: "pointer",
-  },
-  tabBtnActive: {
-    background: COL.green,
-    borderColor: COL.green,
-    color: "#EAF6EE",
   },
   resetBtn: {
     marginLeft: "auto",
@@ -2411,6 +2494,34 @@ const S = {
     fontSize: 12.5,
     cursor: "pointer",
   },
+  bottomNav: {
+    position: "fixed",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 60,
+    display: "flex",
+    background: "rgba(255,255,255,0.88)",
+    backdropFilter: "blur(20px)",
+    WebkitBackdropFilter: "blur(20px)",
+    borderTop: `1px solid ${COL.border}`,
+    padding: "8px 4px calc(6px + env(safe-area-inset-bottom))",
+  },
+  bottomNavBtn: {
+    flex: 1,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 3,
+    background: "transparent",
+    border: "none",
+    color: COL.textDim,
+    fontSize: 10.5,
+    fontWeight: 600,
+    padding: "4px 2px",
+    cursor: "pointer",
+  },
+  bottomNavBtnActive: { color: COL.gold },
 
   blockTabs: {
     maxWidth: 980,
