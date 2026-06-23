@@ -10,6 +10,8 @@ import {
   BarChart,
   Bar,
 } from "recharts";
+import { Capacitor } from "@capacitor/core";
+import { BiometryType, BiometricAuth } from "@aparajita/capacitor-biometric-auth";
 
 const STORAGE_KEY = "desafio125:data"; // legado: usado antes de existir multiconta
 const AUTH_KEY = "desafio125:auth"; // legado: conta única antes da multiconta
@@ -670,6 +672,34 @@ function AuthGate({ children }) {
   const [error, setError] = useState("");
   const [resetConfirm, setResetConfirm] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
+  const [biometryType, setBiometryType] = useState(null); // null | BiometryType
+
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    BiometricAuth.checkBiometry()
+      .then((result) => setBiometryType(result.isAvailable ? result.biometryType : null))
+      .catch(() => setBiometryType(null));
+  }, []);
+
+  async function handleBiometricLogin() {
+    const sesRes = localSession.get(SESSION_KEY);
+    if (!sesRes?.value) return;
+    const session = JSON.parse(sesRes.value);
+    const user = accounts.find((a) => a.id === session.userId);
+    if (!user) return;
+    try {
+      await BiometricAuth.authenticate({
+        reason: "Entrar no Cofre Digital",
+        cancelTitle: "Cancelar",
+        allowDeviceCredential: true,
+      });
+      setCurrentUserId(user.id);
+      setError("");
+      setStatus("unlocked");
+    } catch (e) {
+      // usuário cancelou ou a biometria falhou — fica na tela de login
+    }
+  }
 
   useEffect(() => {
     (async () => {
@@ -771,6 +801,12 @@ function AuthGate({ children }) {
   }
 
   if (status === "auth") {
+    const savedSession = localSession.get(SESSION_KEY);
+    const savedUser =
+      savedSession?.value &&
+      accounts.find((a) => a.id === JSON.parse(savedSession.value).userId);
+    const canUseBiometric = Boolean(biometryType && savedUser);
+
     return (
       <>
         <AuthScreen
@@ -783,6 +819,9 @@ function AuthGate({ children }) {
             setResetConfirm(true);
           }}
           clearError={() => setError("")}
+          biometryType={canUseBiometric ? biometryType : null}
+          biometricUserName={savedUser?.name}
+          onBiometric={handleBiometricLogin}
         />
         {resetConfirm && (
           <ConfirmModal
@@ -806,7 +845,34 @@ function AuthGate({ children }) {
   });
 }
 
-function AuthScreen({ hasAnyAccount, error, onSignup, onLogin, onForgot, clearError }) {
+function biometryLabel(type) {
+  switch (type) {
+    case BiometryType.faceId:
+      return "Face ID";
+    case BiometryType.touchId:
+      return "Touch ID";
+    case BiometryType.fingerprintAuthentication:
+      return "digital";
+    case BiometryType.faceAuthentication:
+      return "reconhecimento facial";
+    case BiometryType.irisAuthentication:
+      return "reconhecimento de íris";
+    default:
+      return "biometria";
+  }
+}
+
+function AuthScreen({
+  hasAnyAccount,
+  error,
+  onSignup,
+  onLogin,
+  onForgot,
+  clearError,
+  biometryType,
+  biometricUserName,
+  onBiometric,
+}) {
   const [mode, setMode] = useState(hasAnyAccount ? "login" : "cadastro");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -862,6 +928,14 @@ function AuthScreen({ hasAnyAccount, error, onSignup, onLogin, onForgot, clearEr
               ? "Leva menos de um minuto. Cada pessoa pode ter sua própria conta neste navegador, vendo só os próprios cofres."
               : "Bem-vindo de volta! Informe seus dados para abrir os seus cofres."}
           </p>
+
+          {mode === "login" && biometryType && (
+            <button type="button" style={S.biometricBtn} onClick={onBiometric}>
+              {biometryType === BiometryType.faceId ? "🙂" : "👆"}{" "}
+              Entrar com {biometryLabel(biometryType)}
+              {biometricUserName ? ` (${biometricUserName})` : ""}
+            </button>
+          )}
 
           <div style={S.authTabs}>
             <button
@@ -2038,6 +2112,22 @@ const S = {
     lineHeight: 1.5,
     margin: "0 0 22px",
     textAlign: "center",
+  },
+  biometricBtn: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    width: "100%",
+    background: COL.panel2,
+    border: `1px solid ${COL.gold}`,
+    color: COL.gold,
+    padding: "12px 16px",
+    borderRadius: 16,
+    fontSize: 14,
+    fontWeight: 600,
+    cursor: "pointer",
+    marginBottom: 18,
   },
   authTabs: {
     display: "flex",
