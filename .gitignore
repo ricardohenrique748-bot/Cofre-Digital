@@ -4,6 +4,7 @@ dist
 .env
 .env.local
 .vercel
+.claude
 
 # iOS (Capacitor)
 ios/App/Pods
