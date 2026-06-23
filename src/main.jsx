@@ -3,18 +3,21 @@ import { createRoot } from "react-dom/client";
 import App from "./App.jsx";
 
 // window.storage não existe nativamente no navegador — este app espera essa API
-// (get/set assíncronos), então a implementamos aqui por cima do localStorage.
+// (get/set assíncronos). Aqui ela fala com /api/storage, que persiste no Neon.
 window.storage = {
   async get(key) {
-    const value = localStorage.getItem(key);
-    return value == null ? null : { value };
+    const res = await fetch(`/api/storage?key=${encodeURIComponent(key)}`);
+    if (!res.ok) throw new Error("storage.get failed");
+    const data = await res.json();
+    return data.value == null ? null : { value: data.value };
   },
   async set(key, value) {
-    if (value === "" || value == null) {
-      localStorage.removeItem(key);
-    } else {
-      localStorage.setItem(key, value);
-    }
+    const res = await fetch("/api/storage", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key, value }),
+    });
+    if (!res.ok) throw new Error("storage.set failed");
     return true;
   },
 };
