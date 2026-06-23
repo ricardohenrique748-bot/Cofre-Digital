@@ -486,10 +486,8 @@ function CofreApp({ onLock, accountName, accountEmail, userId }) {
     showToast("Relatório CSV exportado");
   }
 
-  const showBottomNav = Boolean(challenge && tab !== "setup");
-
   return (
-    <div style={showBottomNav ? { ...S.app, paddingBottom: "calc(86px + env(safe-area-inset-bottom))" } : S.app}>
+    <div style={{ ...S.app, paddingBottom: "calc(86px + env(safe-area-inset-bottom))" }}>
       <GlobalStyle />
       {toast && <div style={S.toast}>{toast}</div>}
 
@@ -609,10 +607,10 @@ function CofreApp({ onLock, accountName, accountEmail, userId }) {
               />
             </div>
           )}
-
-          <BottomNav tab={tab} onChangeTab={setTab} />
         </>
       )}
+
+      <BottomNav tab={tab} onChangeTab={setTab} hasVault={Boolean(activeVault)} />
 
       {selectedSeq != null && (
         <DepositModal
@@ -1778,7 +1776,7 @@ function NavIcon({ id, active }) {
   }
 }
 
-function BottomNav({ tab, onChangeTab }) {
+function BottomNav({ tab, onChangeTab, hasVault }) {
   const items = [
     ["setup", "Início"],
     ["cofre", "Cofre"],
@@ -1790,11 +1788,17 @@ function BottomNav({ tab, onChangeTab }) {
     <nav className="no-print" style={S.bottomNav}>
       {items.map(([id, label]) => {
         const active = tab === id;
+        const disabled = id !== "setup" && !hasVault;
         return (
           <button
             key={id}
-            onClick={() => onChangeTab(id)}
-            style={{ ...S.bottomNavBtn, ...(active ? S.bottomNavBtnActive : {}) }}
+            onClick={() => !disabled && onChangeTab(id)}
+            disabled={disabled}
+            style={{
+              ...S.bottomNavBtn,
+              ...(active ? S.bottomNavBtnActive : {}),
+              ...(disabled ? S.bottomNavBtnDisabled : {}),
+            }}
           >
             <span className={active ? "nav-icon-active" : undefined} key={`${id}-${active}`}>
               <NavIcon id={id} active={active} />
@@ -2522,6 +2526,7 @@ const S = {
     cursor: "pointer",
   },
   bottomNavBtnActive: { color: COL.gold },
+  bottomNavBtnDisabled: { opacity: 0.35, cursor: "not-allowed" },
 
   blockTabs: {
     maxWidth: 980,
