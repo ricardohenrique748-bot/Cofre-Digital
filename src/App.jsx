@@ -1748,10 +1748,10 @@ function GlobalStyle() {
     <style>{`
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
       * { box-sizing: border-box; }
-      html, body { -webkit-text-size-adjust: 100%; }
-      body {
-        padding: env(safe-area-inset-top) env(safe-area-inset-right)
-          env(safe-area-inset-bottom) env(safe-area-inset-left);
+      html, body { -webkit-text-size-adjust: 100%; margin: 0; }
+      html, body, #root {
+        min-height: 100%;
+        background: linear-gradient(160deg, #E6E9FB 0%, #EEF1FB 45%, #F7F8FD 100%);
       }
       ::selection { background: #6C63FF; color: #FFFFFF; }
       select { appearance: none; cursor: pointer; }
@@ -1841,7 +1841,8 @@ const S = {
     background: `linear-gradient(160deg, #E6E9FB 0%, ${COL.bg} 45%, #F7F8FD 100%)`,
     color: COL.text,
     fontFamily: FONT_BODY,
-    padding: "32px 20px 64px",
+    padding:
+      "calc(32px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right)) calc(64px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left))",
   },
   toast: {
     position: "fixed",
