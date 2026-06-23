@@ -865,12 +865,14 @@ function AuthScreen({ hasAnyAccount, error, onSignup, onLogin, onForgot, clearEr
 
           <div style={S.authTabs}>
             <button
+              type="button"
               style={{ ...S.authTabBtn, ...(mode === "cadastro" ? S.authTabBtnActive : {}) }}
               onClick={() => switchMode("cadastro")}
             >
               Cadastrar
             </button>
             <button
+              type="button"
               style={{ ...S.authTabBtn, ...(mode === "login" ? S.authTabBtnActive : {}) }}
               onClick={() => switchMode("login")}
             >
@@ -878,87 +880,100 @@ function AuthScreen({ hasAnyAccount, error, onSignup, onLogin, onForgot, clearEr
             </button>
           </div>
 
-          {mode === "cadastro" && (
-            <>
-              <label style={S.fieldLabel}>Nome</label>
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                style={S.textInput}
-                placeholder="ex: Danilo"
-                autoFocus
-              />
-            </>
-          )}
-
-          <label style={S.fieldLabel}>E-mail</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={S.textInput}
-            placeholder="seuemail@exemplo.com"
-            autoFocus={mode === "login"}
-          />
-
-          <label style={S.fieldLabel}>Senha</label>
-          <PasswordInput
-            value={pw}
-            onChange={(e) => setPw(e.target.value)}
-            placeholder={mode === "cadastro" ? "mínimo 4 caracteres" : "••••••••"}
-            onKeyDown={(e) => e.key === "Enter" && mode === "login" && handleSubmit()}
-          />
-
-          {mode === "cadastro" && (
-            <>
-              <label style={S.fieldLabel}>Confirmar senha</label>
-              <PasswordInput
-                value={pw2}
-                onChange={(e) => setPw2(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-              />
-            </>
-          )}
-
-          {mode === "login" && (
-            <div style={S.authRow}>
-              <label style={S.authCheckboxLabel}>
-                <input
-                  type="checkbox"
-                  checked={remember}
-                  onChange={(e) => setRemember(e.target.checked)}
-                  style={S.authCheckbox}
-                />
-                Lembrar por 30 dias
-              </label>
-              <button style={S.authLink} onClick={() => onForgot(email)}>
-                Esqueci minha senha
-              </button>
-            </div>
-          )}
-
-          {shownError && <div style={S.authError}>{shownError}</div>}
-
-          <button
-            style={{ ...S.primaryBtn, ...S.setupSubmit, ...(busy ? S.btnDisabled : {}) }}
-            disabled={busy}
-            onClick={handleSubmit}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSubmit();
+            }}
           >
-            {busy ? "Enviando..." : mode === "cadastro" ? "Criar conta" : "Entrar"}
-          </button>
+            {mode === "cadastro" && (
+              <>
+                <label style={S.fieldLabel}>Nome</label>
+                <input
+                  name="name"
+                  autoComplete="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  style={S.textInput}
+                  placeholder="ex: Danilo"
+                  autoFocus
+                />
+              </>
+            )}
+
+            <label style={S.fieldLabel}>E-mail</label>
+            <input
+              type="email"
+              name="email"
+              autoComplete={mode === "cadastro" ? "email" : "username"}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={S.textInput}
+              placeholder="seuemail@exemplo.com"
+              autoFocus={mode === "login"}
+            />
+
+            <label style={S.fieldLabel}>Senha</label>
+            <PasswordInput
+              name="password"
+              autoComplete={mode === "cadastro" ? "new-password" : "current-password"}
+              value={pw}
+              onChange={(e) => setPw(e.target.value)}
+              placeholder={mode === "cadastro" ? "mínimo 4 caracteres" : "••••••••"}
+            />
+
+            {mode === "cadastro" && (
+              <>
+                <label style={S.fieldLabel}>Confirmar senha</label>
+                <PasswordInput
+                  name="confirm-password"
+                  autoComplete="new-password"
+                  value={pw2}
+                  onChange={(e) => setPw2(e.target.value)}
+                />
+              </>
+            )}
+
+            {mode === "login" && (
+              <div style={S.authRow}>
+                <label style={S.authCheckboxLabel}>
+                  <input
+                    type="checkbox"
+                    checked={remember}
+                    onChange={(e) => setRemember(e.target.checked)}
+                    style={S.authCheckbox}
+                  />
+                  Lembrar por 30 dias
+                </label>
+                <button type="button" style={S.authLink} onClick={() => onForgot(email)}>
+                  Esqueci minha senha
+                </button>
+              </div>
+            )}
+
+            {shownError && <div style={S.authError}>{shownError}</div>}
+
+            <button
+              type="submit"
+              style={{ ...S.primaryBtn, ...S.setupSubmit, ...(busy ? S.btnDisabled : {}) }}
+              disabled={busy}
+            >
+              {busy ? "Enviando..." : mode === "cadastro" ? "Criar conta" : "Entrar"}
+            </button>
+          </form>
 
           <p style={S.authSwitchText}>
             {mode === "cadastro" ? (
               <>
                 Já tem uma conta?{" "}
-                <button style={S.authLink} onClick={() => switchMode("login")}>
+                <button type="button" style={S.authLink} onClick={() => switchMode("login")}>
                   Entrar
                 </button>
               </>
             ) : (
               <>
                 Não tem uma conta?{" "}
-                <button style={S.authLink} onClick={() => switchMode("cadastro")}>
+                <button type="button" style={S.authLink} onClick={() => switchMode("cadastro")}>
                   Cadastre-se
                 </button>
               </>
@@ -1600,12 +1615,14 @@ function EyeOffIcon({ size = 20 }) {
   );
 }
 
-function PasswordInput({ value, onChange, placeholder, onKeyDown }) {
+function PasswordInput({ value, onChange, placeholder, onKeyDown, name, autoComplete }) {
   const [visible, setVisible] = useState(false);
   return (
     <div style={S.passwordWrap}>
       <input
         type={visible ? "text" : "password"}
+        name={name}
+        autoComplete={autoComplete}
         value={value}
         onChange={onChange}
         onKeyDown={onKeyDown}
