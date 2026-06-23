@@ -230,6 +230,10 @@ function CofreApp({ onLock, accountName, accountEmail, userId }) {
   const challenge = activeVault ? activeVault.challenge : null;
   const deposits = activeVault ? activeVault.deposits : {};
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [tab]);
+
   // ---- load / persist ----
   useEffect(() => {
     (async () => {
@@ -1803,7 +1807,7 @@ function BottomNav({ tab, onChangeTab, hasVault }) {
             <span className={active ? "nav-icon-active" : undefined} key={`${id}-${active}`}>
               <NavIcon id={id} active={active} />
             </span>
-            <span>{label}</span>
+            <span style={S.bottomNavBtnLabel}>{label}</span>
           </button>
         );
       })}
@@ -2513,6 +2517,7 @@ const S = {
   },
   bottomNavBtn: {
     flex: 1,
+    minWidth: 0,
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
@@ -2520,12 +2525,18 @@ const S = {
     background: "transparent",
     border: "none",
     color: COL.textDim,
-    fontSize: 10.5,
+    fontSize: 10,
     fontWeight: 600,
     padding: "4px 2px",
     cursor: "pointer",
   },
   bottomNavBtnActive: { color: COL.gold },
+  bottomNavBtnLabel: {
+    maxWidth: "100%",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  },
   bottomNavBtnDisabled: { opacity: 0.35, cursor: "not-allowed" },
 
   blockTabs: {
