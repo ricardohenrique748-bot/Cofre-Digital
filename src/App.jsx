@@ -1748,9 +1748,10 @@ function GlobalStyle() {
     <style>{`
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
       * { box-sizing: border-box; }
-      html, body { -webkit-text-size-adjust: 100%; margin: 0; }
+      html, body { -webkit-text-size-adjust: 100%; margin: 0; overflow-x: hidden; }
       html, body, #root {
         min-height: 100%;
+        width: 100%;
         background: linear-gradient(160deg, #E6E9FB 0%, #EEF1FB 45%, #F7F8FD 100%);
       }
       ::selection { background: #6C63FF; color: #FFFFFF; }
