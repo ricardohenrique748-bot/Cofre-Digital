@@ -902,11 +902,9 @@ function AuthScreen({ hasAnyAccount, error, onSignup, onLogin, onForgot, clearEr
           />
 
           <label style={S.fieldLabel}>Senha</label>
-          <input
-            type="password"
+          <PasswordInput
             value={pw}
             onChange={(e) => setPw(e.target.value)}
-            style={S.textInput}
             placeholder={mode === "cadastro" ? "mínimo 4 caracteres" : "••••••••"}
             onKeyDown={(e) => e.key === "Enter" && mode === "login" && handleSubmit()}
           />
@@ -914,11 +912,9 @@ function AuthScreen({ hasAnyAccount, error, onSignup, onLogin, onForgot, clearEr
           {mode === "cadastro" && (
             <>
               <label style={S.fieldLabel}>Confirmar senha</label>
-              <input
-                type="password"
+              <PasswordInput
                 value={pw2}
                 onChange={(e) => setPw2(e.target.value)}
-                style={S.textInput}
                 onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
               />
             </>
@@ -1559,6 +1555,31 @@ function initials(name) {
   const first = parts[0]?.[0] || "";
   const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
   return (first + last).toUpperCase();
+}
+
+function PasswordInput({ value, onChange, placeholder, onKeyDown }) {
+  const [visible, setVisible] = useState(false);
+  return (
+    <div style={S.passwordWrap}>
+      <input
+        type={visible ? "text" : "password"}
+        value={value}
+        onChange={onChange}
+        onKeyDown={onKeyDown}
+        style={S.passwordInput}
+        placeholder={placeholder}
+      />
+      <button
+        type="button"
+        style={S.passwordToggle}
+        onClick={() => setVisible((v) => !v)}
+        title={visible ? "Ocultar senha" : "Mostrar senha"}
+        tabIndex={-1}
+      >
+        {visible ? "🙈" : "👁️"}
+      </button>
+    </div>
+  );
 }
 
 function AvatarLabelGroup({ name, email, onLogout }) {
@@ -2403,6 +2424,30 @@ const S = {
     fontSize: 14,
     fontFamily: FONT_BODY,
     outline: "none",
+  },
+  passwordWrap: { position: "relative", width: "100%" },
+  passwordInput: {
+    width: "100%",
+    background: COL.panel2,
+    border: `1px solid ${COL.border}`,
+    borderRadius: 16,
+    padding: "10px 40px 10px 12px",
+    color: COL.text,
+    fontSize: 14,
+    fontFamily: FONT_BODY,
+    outline: "none",
+  },
+  passwordToggle: {
+    position: "absolute",
+    right: 8,
+    top: "50%",
+    transform: "translateY(-50%)",
+    background: "transparent",
+    border: "none",
+    cursor: "pointer",
+    fontSize: 16,
+    padding: 4,
+    lineHeight: 1,
   },
 
   // ---- notificações inteligentes ----
