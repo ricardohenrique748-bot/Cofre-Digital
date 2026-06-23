@@ -487,12 +487,7 @@ function CofreApp({ onLock, accountName, accountEmail, userId }) {
           ) : (
             <span style={S.eyebrow}>COFRE DIGITAL · DESAFIO DE POUPANÇA</span>
           )}
-          <AvatarLabelGroup
-            name={accountName}
-            email={accountEmail}
-            onClick={onLock}
-            title="Bloquear acesso"
-          />
+          <AvatarLabelGroup name={accountName} email={accountEmail} onLogout={onLock} />
         </div>
         <h1 style={S.title}>{activeVault && tab !== "setup" ? activeVault.name : "Cofre Digital"}</h1>
         <p style={S.subtitle}>
@@ -1559,15 +1554,46 @@ function initials(name) {
   return (first + last).toUpperCase();
 }
 
-function AvatarLabelGroup({ name, email, onClick, title }) {
+function AvatarLabelGroup({ name, email, onLogout }) {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function handleOutsideClick(e) {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, [open]);
+
   return (
-    <button style={S.avatarGroup} onClick={onClick} title={title}>
-      <span style={S.avatarCircle}>{initials(name)}</span>
-      <span style={S.avatarLabels}>
-        <span style={S.avatarName}>{name || "Conta"}</span>
-        {email && <span style={S.avatarEmail}>{email}</span>}
-      </span>
-    </button>
+    <div style={S.avatarMenuWrap} ref={wrapRef}>
+      <button
+        style={S.avatarGroup}
+        onClick={() => setOpen((o) => !o)}
+        title="Opções da conta"
+      >
+        <span style={S.avatarCircle}>{initials(name)}</span>
+        <span style={S.avatarLabels}>
+          <span style={S.avatarName}>{name || "Conta"}</span>
+          {email && <span style={S.avatarEmail}>{email}</span>}
+        </span>
+      </button>
+      {open && (
+        <div style={S.avatarDropdown}>
+          <button
+            style={S.avatarDropdownItem}
+            onClick={() => {
+              setOpen(false);
+              onLogout();
+            }}
+          >
+            🚪 Sair do sistema
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -1826,6 +1852,34 @@ const S = {
   },
   avatarName: { fontSize: 12.5, fontWeight: 600, color: COL.text },
   avatarEmail: { fontSize: 11, color: COL.textDim },
+  avatarMenuWrap: { position: "relative", display: "inline-block" },
+  avatarDropdown: {
+    position: "absolute",
+    top: "calc(100% + 8px)",
+    right: 0,
+    minWidth: 180,
+    background: COL.panel,
+    border: `1px solid ${COL.border}`,
+    borderRadius: 14,
+    boxShadow: CARD_SHADOW,
+    padding: 6,
+    zIndex: 50,
+  },
+  avatarDropdownItem: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    width: "100%",
+    background: "transparent",
+    border: "none",
+    color: COL.danger,
+    fontSize: 13,
+    fontWeight: 600,
+    padding: "9px 10px",
+    borderRadius: 8,
+    cursor: "pointer",
+    textAlign: "left",
+  },
 
   logoWordmark: {
     fontFamily: FONT_DISPLAY,
