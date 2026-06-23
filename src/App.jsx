@@ -1744,6 +1744,11 @@ function GlobalStyle() {
     <style>{`
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
       * { box-sizing: border-box; }
+      html, body { -webkit-text-size-adjust: 100%; }
+      body {
+        padding: env(safe-area-inset-top) env(safe-area-inset-right)
+          env(safe-area-inset-bottom) env(safe-area-inset-left);
+      }
       ::selection { background: #6C63FF; color: #FFFFFF; }
       select { appearance: none; cursor: pointer; }
 
@@ -2481,7 +2486,7 @@ const S = {
     borderRadius: 16,
     padding: "10px 12px",
     color: COL.text,
-    fontSize: 14,
+    fontSize: 16,
     fontFamily: FONT_BODY,
     outline: "none",
   },
@@ -2493,7 +2498,7 @@ const S = {
     borderRadius: 16,
     padding: "10px 40px 10px 12px",
     color: COL.text,
-    fontSize: 14,
+    fontSize: 16,
     fontFamily: FONT_BODY,
     outline: "none",
   },
