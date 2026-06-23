@@ -2351,7 +2351,7 @@ const S = {
     maxWidth: 980,
     margin: "0 auto",
     display: "grid",
-    gridTemplateColumns: "repeat(10, 1fr)",
+    gridTemplateColumns: "repeat(auto-fill, minmax(34px, 1fr))",
     gap: 6,
   },
   cell: {
