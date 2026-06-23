@@ -1089,7 +1089,7 @@ function VaultsHub({ vaults, onSelectVault, onCreateVault, onRenameVault, onDele
         />
 
         <label style={{ ...S.fieldLabel, marginTop: 14 }}>Valor da meta</label>
-        <div style={S.presetRow}>
+        <div className="preset-grid" style={S.presetRow}>
           {PRESETS.map((p) => (
             <button key={p} style={S.presetChip} onClick={() => setInput(String(p))}>
               {fmtBRL(p)}
@@ -1665,7 +1665,11 @@ function AvatarLabelGroup({ name, email, onLogout }) {
         <span style={S.avatarCircle}>{initials(name)}</span>
         <span style={S.avatarLabels}>
           <span style={S.avatarName}>{name || "Conta"}</span>
-          {email && <span style={S.avatarEmail}>{email}</span>}
+          {email && (
+            <span className="avatar-email" style={S.avatarEmail}>
+              {email}
+            </span>
+          )}
         </span>
       </button>
       {open && (
@@ -1800,6 +1804,11 @@ function GlobalStyle() {
         .no-print { display: none !important; }
         body { background: #fff !important; }
       }
+
+      @media (max-width: 480px) {
+        .avatar-email { display: none; }
+        .preset-grid { grid-template-columns: 1fr !important; }
+      }
     `}</style>
   );
 }
@@ -1888,9 +1897,10 @@ const S = {
   headerBrand: { marginBottom: 14 },
   headerTop: {
     display: "flex",
+    flexWrap: "wrap",
     justifyContent: "space-between",
     alignItems: "center",
-    gap: 8,
+    gap: 10,
     marginBottom: 10,
     minHeight: 28,
   },
@@ -2159,15 +2169,21 @@ const S = {
   setupTitle: { fontFamily: FONT_DISPLAY, fontSize: 24, fontWeight: 600, margin: "0 0 10px" },
   setupText: { color: COL.textDim, fontSize: 14, lineHeight: 1.55, margin: "0 0 20px" },
 
-  presetRow: { display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 18 },
+  presetRow: {
+    display: "grid",
+    gridTemplateColumns: "repeat(2, 1fr)",
+    gap: 8,
+    marginBottom: 18,
+  },
   presetChip: {
     background: COL.panel2,
     border: `1px solid ${COL.border}`,
     color: COL.text,
-    padding: "8px 14px",
-    borderRadius: 999,
+    padding: "10px 14px",
+    borderRadius: 14,
     fontSize: 13,
     fontFamily: FONT_MONO,
+    textAlign: "center",
     cursor: "pointer",
   },
 
