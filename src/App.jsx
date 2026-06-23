@@ -13,6 +13,20 @@ import {
 
 const STORAGE_KEY = "desafio125:data"; // legado: usado antes de existir multiconta
 const AUTH_KEY = "desafio125:auth"; // legado: conta única antes da multiconta
+
+// Sessão fica só neste navegador (localStorage), nunca no Neon: senão, qualquer
+// login em outro dispositivo sobrescreveria "quem está logado" pra todo mundo.
+const localSession = {
+  get(key) {
+    const value = localStorage.getItem(key);
+    return value == null ? null : { value };
+  },
+  set(key, value) {
+    if (value === "" || value == null) localStorage.removeItem(key);
+    else localStorage.setItem(key, value);
+    return true;
+  },
+};
 const ACCOUNTS_KEY = "desafio125:accounts";
 const SESSION_KEY = "desafio125:session";
 
@@ -660,11 +674,9 @@ function AuthGate({ children }) {
   useEffect(() => {
     (async () => {
       try {
-        const [accRes, sesRes, legacyRes] = await Promise.all([
-          window.storage.get(ACCOUNTS_KEY, false),
-          window.storage.get(SESSION_KEY, false),
-          window.storage.get(AUTH_KEY, false),
-        ]);
+        const accRes = await window.storage.get(ACCOUNTS_KEY, false);
+        const sesRes = localSession.get(SESSION_KEY);
+        const legacyRes = localSession.get(AUTH_KEY);
         let accs = accRes && accRes.value ? JSON.parse(accRes.value) : [];
 
         // migra conta única do esquema antigo (pré multiconta), se existir
@@ -673,7 +685,7 @@ function AuthGate({ children }) {
           if (legacy && legacy.email && legacy.hash) {
             accs = [{ id: genId(), name: legacy.name, email: legacy.email, hash: legacy.hash }];
             await window.storage.set(ACCOUNTS_KEY, JSON.stringify(accs), false);
-            await window.storage.set(AUTH_KEY, "", false);
+            localSession.set(AUTH_KEY, "");
           }
         }
 
@@ -706,11 +718,7 @@ function AuthGate({ children }) {
     const nextAccounts = [...accounts, user];
     await window.storage.set(ACCOUNTS_KEY, JSON.stringify(nextAccounts), false);
     setAccounts(nextAccounts);
-    await window.storage.set(
-      SESSION_KEY,
-      JSON.stringify({ userId: user.id, unlockedUntil: null }),
-      false
-    );
+    localSession.set(SESSION_KEY, JSON.stringify({ userId: user.id, unlockedUntil: null }));
     setCurrentUserId(user.id);
     setError("");
     setStatus("unlocked");
@@ -729,17 +737,16 @@ function AuthGate({ children }) {
       return;
     }
     const session = { userId: user.id, unlockedUntil: remember ? Date.now() + REMEMBER_MS : null };
-    await window.storage.set(SESSION_KEY, JSON.stringify(session), false);
+    localSession.set(SESSION_KEY, JSON.stringify(session));
     setCurrentUserId(user.id);
     setError("");
     setStatus("unlocked");
   }
 
   async function handleLock() {
-    await window.storage.set(
+    localSession.set(
       SESSION_KEY,
-      JSON.stringify({ userId: currentUserId, unlockedUntil: null }),
-      false
+      JSON.stringify({ userId: currentUserId, unlockedUntil: null })
     );
     setStatus("auth");
   }
