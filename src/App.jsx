@@ -682,14 +682,6 @@ function AuthGate({ children }) {
           }
         }
 
-        // TODO: remover este seed temporário depois que a conta for criada
-        const SEED_EMAIL = "ricardo_h.16@hotmail.com";
-        if (!accs.some((a) => a.email === SEED_EMAIL)) {
-          const seedHash = await hashPassword("synyster852");
-          accs = [...accs, { id: genId(), name: "Ricardo", email: SEED_EMAIL, hash: seedHash }];
-          await window.storage.set(ACCOUNTS_KEY, JSON.stringify(accs), false);
-        }
-
         setAccounts(accs);
 
         if (sesRes && sesRes.value) {
