@@ -10,6 +10,9 @@
     "migrate": "node scripts/migrate.mjs"
   },
   "dependencies": {
+    "@capacitor/cli": "^8.4.1",
+    "@capacitor/core": "^8.4.1",
+    "@capacitor/ios": "^8.4.1",
     "dotenv": "^17.4.2",
     "pg": "^8.22.0",
     "react": "^18.3.1",
